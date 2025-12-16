@@ -1,6 +1,19 @@
 # Python
 __pycache__/
-*.pyc
-
-# Virtual environment
+*.py[cod]
 .venv/
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+
+# Project
+tools/
+shared_data/uploads/*
+shared_data/output/*
+shared_data/temp/*
+!shared_data/*/.gitkeep
+containers/**/*.sif
+*.log
+.env
