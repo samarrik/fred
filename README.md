@@ -9,41 +9,31 @@ Generate videos with identity reenactment (X-Nemo) and voice conversion (Seed-VC
 3. System runs **X-Nemo** (face reenactment) + **Seed-VC** (voice conversion)
 4. Output: Video with the identity's face animated by user's motion, speaking with identity's voice
 
-## Quick Start
+## Installation
 
-### 1. Prerequisites
+### Prerequisites
 
 - **Conda** (Miniconda or Anaconda)
 - **CUDA-capable GPU** (16GB+ VRAM recommended)
-- **FFmpeg** - Load via module system on cluster: `module load FFmpeg`
 - **Git** for cloning repositories
 
-### 2. Clone This Repository
+### Step 1: Clone Repositories
 
 ```bash
+# Clone main repository
 git clone <this-repo-url> fred
 cd fred
-```
 
-### 3. Clone ML Tool Repositories
-
-Clone the X-Nemo and Seed-VC repos into a `tools/` directory:
-
-```bash
-# Create tools directory (inside fred or anywhere you prefer)
+# Clone ML tool repositories
 mkdir -p tools
-
-# X-Nemo - Face reenactment
 git clone https://github.com/samarrik/x-nemo-inference tools/x-nemo-inference
-
-# Seed-VC - Voice conversion
 git clone https://github.com/samarrik/seed-vc tools/seed-vc
 ```
 
-### 4. Create Conda Environment
+### Step 2: Setup Python Environment
 
 ```bash
-# Create environment with Python 3.10
+# Create conda environment with Python 3.10
 conda create -n fred python=3.10 -y
 conda activate fred
 
@@ -53,22 +43,34 @@ conda install pytorch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 pytorch-cuda=
 
 # For CUDA 11.8:
 # conda install pytorch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 pytorch-cuda=11.8 -c pytorch -c nvidia -y
-```
 
-### 5. Install Dependencies
-
-```bash
-cd fred
-conda activate fred
-
-# Install all ML dependencies
+# Install all Python dependencies (includes ML packages)
 pip install -r requirements-ml.txt
 
 # Install Fred package
 pip install -e .
 ```
 
-### 6. Download Pretrained Weights
+### Step 3: Install FFmpeg
+
+**On cluster (module system):**
+```bash
+module load FFmpeg
+```
+
+**Local installation:**
+```bash
+# Ubuntu/Debian
+sudo apt install ffmpeg
+
+# macOS
+brew install ffmpeg
+
+# Conda (if not using system FFmpeg)
+conda install ffmpeg -c conda-forge
+```
+
+### Step 4: Download Pretrained Weights
 
 #### One-Command Download
 
@@ -107,7 +109,7 @@ tools/x-nemo-inference/pretrained_weights/
 
 Seed-VC weights are **downloaded automatically** from HuggingFace on first run.
 
-### 7. Add Identity Assets
+### Step 5: Add Identity Assets
 
 Create folders in `identities/` with face images and a voice sample:
 
@@ -131,7 +133,7 @@ identities/
 python -c "from app.core.identities import list_identity_status; list_identity_status()"
 ```
 
-### 8. Configure Paths (if needed)
+### Step 6: Configure Paths (Optional)
 
 If you placed the tools in a different location, set environment variables:
 
@@ -143,43 +145,40 @@ export XNEMO_WEIGHTS_PATH=/path/to/x-nemo-inference/pretrained_weights
 
 Or create a `.env` file in the fred directory.
 
-### 9. Verify Setup
+### Step 7: Verify Setup
 
 ```bash
 python scripts/verify_setup.py
 ```
 
-### 10. Run the Pipeline
+## Running the Pipeline
 
-**Note:** On cluster systems, load FFmpeg module first:
-```bash
-module load FFmpeg
-```
-
-#### Option A: Gradio GUI (Recommended)
+### Option A: Gradio GUI (Recommended)
 
 ```bash
+# Activate environment
 conda activate fred
+
+# Load FFmpeg module (if on cluster)
+module load FFmpeg  # Skip if running locally with system FFmpeg
+
+# Run GUI
 python app/gui.py
 ```
 
 Open **http://localhost:7860** in your browser.
 
-#### Option B: API + Worker (for production)
+### Option B: API + Worker (for production)
 
 ```bash
-# Load FFmpeg module (if on cluster)
-module load FFmpeg
-
-# Terminal 1: Database (optional, uses SQLite by default)
-# ./scripts/start_postgres.sh
-
-# Terminal 2: API server
+# Terminal 1: API server
 conda activate fred
+module load FFmpeg  # Skip if running locally
 python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
 
-# Terminal 3: Background worker
+# Terminal 2: Background worker
 conda activate fred
+module load FFmpeg  # Skip if running locally
 python -m app.workers.job_worker
 ```
 
@@ -187,32 +186,37 @@ API available at http://localhost:8000
 
 ---
 
-## Quick Start Summary
+## Quick Start (All-in-One)
+
+Complete setup script:
 
 ```bash
-# Clone everything
+# 1. Clone repositories
 git clone <this-repo> fred && cd fred
 mkdir -p tools
 git clone https://github.com/samarrik/x-nemo-inference tools/x-nemo-inference
 git clone https://github.com/samarrik/seed-vc tools/seed-vc
 
-# Setup conda environment
-conda create -n fred python=3.10 -y && conda activate fred
+# 2. Setup Python environment
+conda create -n fred python=3.10 -y
+conda activate fred
 conda install pytorch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 pytorch-cuda=12.1 -c pytorch -c nvidia -y
-
-# Install all dependencies
 pip install -r requirements-ml.txt
 pip install -e .
 
-# Download weights (see step 6)
+# 3. Install FFmpeg
+# On cluster:
+module load FFmpeg
+# Or locally:
+# sudo apt install ffmpeg  # Ubuntu/Debian
+# brew install ffmpeg      # macOS
+
+# 4. Download weights
 python scripts/download_weights.py
 
-# Add identities to identities/ folder (see step 7)
+# 5. Add identities to identities/ folder (see Step 5 above)
 
-# Load FFmpeg module (if on cluster)
-module load FFmpeg
-
-# Run
+# 6. Run
 python app/gui.py
 ```
 
@@ -359,9 +363,8 @@ python -c "from app.core.identities import list_identity_status; list_identity_s
 
 ### FFmpeg not found
 
-**On cluster (module system):**
+**On cluster:**
 ```bash
-# Load FFmpeg module before running
 module load FFmpeg
 ```
 
@@ -375,6 +378,11 @@ brew install ffmpeg
 
 # Conda
 conda install ffmpeg -c conda-forge
+```
+
+**Verify FFmpeg is working:**
+```bash
+ffmpeg -version
 ```
 
 ---
