@@ -15,7 +15,7 @@ Generate videos with identity reenactment (X-Nemo) and voice conversion (Seed-VC
 
 - **Conda** (Miniconda or Anaconda)
 - **CUDA-capable GPU** (16GB+ VRAM recommended)
-- **FFmpeg** installed system-wide
+- **FFmpeg** - Load via module system on cluster: `module load FFmpeg`
 - **Git** for cloning repositories
 
 ### 2. Clone This Repository
@@ -151,6 +151,11 @@ python scripts/verify_setup.py
 
 ### 10. Run the Pipeline
 
+**Note:** On cluster systems, load FFmpeg module first:
+```bash
+module load FFmpeg
+```
+
 #### Option A: Gradio GUI (Recommended)
 
 ```bash
@@ -163,6 +168,9 @@ Open **http://localhost:7860** in your browser.
 #### Option B: API + Worker (for production)
 
 ```bash
+# Load FFmpeg module (if on cluster)
+module load FFmpeg
+
 # Terminal 1: Database (optional, uses SQLite by default)
 # ./scripts/start_postgres.sh
 
@@ -200,6 +208,9 @@ pip install -e .
 python scripts/download_weights.py
 
 # Add identities to identities/ folder (see step 7)
+
+# Load FFmpeg module (if on cluster)
+module load FFmpeg
 
 # Run
 python app/gui.py
@@ -347,6 +358,14 @@ python -c "from app.core.identities import list_identity_status; list_identity_s
 - Need 16GB+ VRAM for comfortable processing
 
 ### FFmpeg not found
+
+**On cluster (module system):**
+```bash
+# Load FFmpeg module before running
+module load FFmpeg
+```
+
+**Local installation:**
 ```bash
 # Ubuntu/Debian
 sudo apt install ffmpeg
